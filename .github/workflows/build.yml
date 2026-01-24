@@ -42,14 +42,14 @@ jobs:
     - name: Read Terraform version
       id: terraform-version
       run: echo "version=$(cat .terraform-version | tr -d '[:space:]')" >> $GITHUB_OUTPUT
-    - name: Terraform - Setup
+    - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{steps.terraform-version.outputs.version}}
 
     - name: Validate
       run: |
-        /.validate "${{matrix.cloud}}" "${{matrix.cicd}}"
+        ./validate "${{matrix.cloud}}" "${{matrix.cicd}}"
 
   build-success:
     needs:
