@@ -47,13 +47,9 @@ jobs:
       with:
         terraform_version: ${{steps.terraform-version.outputs.version}}
 
-    - name: Terraform - Init
-      working-directory: ${{matrix.cloud}}/${{matrix.cicd}}
-      run: terraform init -backend=false
-
-    - name: Terraform - Validate
-      working-directory: ${{matrix.cloud}}/${{matrix.cicd}}
-      run: terraform validate
+    - name: Validate
+      run: |
+        /.validate "${{matrix.cloud}}" "${{matrix.cicd}}"
 
   build-success:
     needs:

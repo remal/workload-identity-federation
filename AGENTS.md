@@ -50,8 +50,9 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
 
 - **Version constraint**: `~> 1.14` (requires Terraform >= 1.14.0, < 2.0.0)
 - **Google provider**: Use latest stable version with pessimistic constraint (`~> 6.0` or similar)
-- Use `terraform fmt` for formatting
-- Use `terraform validate` before committing
+- For Terraform file changes, run from the repository root:
+  1. `terraform fmt -recursive <cloud>/<cicd>` to format files
+  2. `./validate <cloud> <cicd>` to validate
 - Variables must have descriptions
 - Use `validation` blocks for input validation where appropriate
 - Prefer explicit resource references over `depends_on` when possible

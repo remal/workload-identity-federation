@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 2 ]]; then
+  echo "Usage: $0 <cloud> <cicd>" >&2
+  exit 1
+fi
+
+cloud="$1"
+cicd="$2"
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+dir="${script_dir}/${cloud}/${cicd}"
+
+if [[ ! -d "$dir" ]]; then
+  echo "Error: directory '$dir' does not exist" >&2
+  exit 1
+fi
+
+(
+  cd "$dir"
+
+  echo "Initializing Terraform:"
+  terraform init -backend=false
+
+  echo ""
+
+  echo "Validating Terraform configuration:"
+  terraform validate
+)
