@@ -16,6 +16,7 @@ Optional variables:
 - `workload_identity_pool_id` - Custom pool ID (default: `github-pool`)
 - `create_pool` - Whether to create the pool (default: `true`)
 - `provider_id` - Custom provider ID (auto-generated if not provided)
+- `provider_display_name` - Custom provider display name (auto-generated if not provided, max 32 characters)
 
 ## Design Decisions
 

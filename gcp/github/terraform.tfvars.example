@@ -18,6 +18,10 @@ roles = [
 # Required if auto-generated ID exceeds 32 characters
 # provider_id = "myorg-myrepo"
 
+# Optional: Custom provider display name (auto-generated as "GH Actions: {owner/repo}")
+# Required if auto-generated name exceeds 32 characters
+# provider_display_name = "GH Actions: org/repo"
+
 # Optional: Custom Workload Identity Pool ID
 # workload_identity_pool_id = "github-pool"
 

@@ -53,3 +53,14 @@ variable "provider_id" {
   }
 }
 
+variable "provider_display_name" {
+  description = "Custom display name for the Workload Identity Pool Provider. If not provided, auto-generated from repository name (max 32 characters)"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.provider_display_name == null || length(var.provider_display_name) <= 32
+    error_message = "Provider display name must be 32 characters or less."
+  }
+}
+
