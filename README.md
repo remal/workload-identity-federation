@@ -30,7 +30,7 @@ If you need to share state or work in a team, consider using a remote backend (G
 
 ## Contributing
 
-See [CLAUDE.md](CLAUDE.md) for coding guidelines and architecture decisions.
+See [AGENTS.md](AGENTS.md) for coding guidelines and architecture decisions.
 
 ## License
 

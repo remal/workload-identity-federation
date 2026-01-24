@@ -1,4 +1,4 @@
-# CLAUDE.md - Coding Agent Instructions
+# Coding Agent Instructions
 
 ## Project Overview
 
@@ -69,11 +69,13 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
 Required variables should be minimal. Use sensible defaults where possible.
 
 For `gcp/github`, the required variables are:
+
 - `project_id` - GCP project ID
 - `repository` - GitHub repository in `owner/repo` format
 - `roles` - List of IAM roles to grant (can be empty list)
 
 Optional variables:
+
 - `service_account_id` - Custom service account ID (auto-generated if not provided)
 - `workload_identity_pool_id` - Custom pool ID (default: `github-pool`)
 - `region` - GCP region (default: `global` for WIF resources)
@@ -105,6 +107,7 @@ terraform version  # Uses version from .terraform-version
 ```
 
 The `.terraform-version` file contains just the version number:
+
 ```
 1.14.0
 ```
