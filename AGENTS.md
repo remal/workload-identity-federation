@@ -39,7 +39,7 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
   2. If validation succeeds, run `terraform fmt -recursive <cloud>/<cicd>` to format files
   3. Update documentation if the change affects documented behavior (see Documentation Maintenance)
 - Variables must have descriptions
-- Use `validation` blocks for input validation where appropriate
+- Use `validation` blocks for input validation (see Variable Validation below)
 - Prefer explicit resource references over `depends_on` when possible
 - Use `locals` for computed values and to reduce repetition
 
@@ -53,6 +53,39 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
 ### Variable Design
 
 Required variables should be minimal. Use sensible defaults where possible. See cloud-specific AGENTS.md files for variable details.
+
+### Variable Validation
+
+Use `validation` blocks to catch errors at `terraform plan` time rather than at apply time. The goal is to fail fast with clear error messages before any resources are created.
+
+**When to add validation:**
+
+- Format constraints (e.g., must match a regex pattern)
+- Length constraints (e.g., min/max length for resource names)
+- Allowed values (e.g., must be one of a known set)
+- Logical constraints (e.g., end date must be after start date)
+- Cloud-specific naming rules (e.g., GCP project ID format)
+
+**Example:**
+
+```hcl
+variable "project_id" {
+  description = "GCP project ID"
+  type        = string
+
+  validation {
+    condition     = can(regex("^[a-z][a-z0-9-]{4,28}[a-z0-9]$", var.project_id))
+    error_message = "Project ID must be 6-30 characters, start with a letter, and contain only lowercase letters, numbers, and hyphens."
+  }
+}
+```
+
+**Guidelines:**
+
+- Write clear, actionable error messages that tell the user what is expected
+- Validate all constraints that can be checked without API calls
+- For complex objects or lists, validate individual elements where practical
+- Do not over-validate — skip validation for values that will be validated by the cloud provider with equally clear errors
 
 ## Local Development
 
@@ -113,7 +146,8 @@ When adding support for a new cloud or CI/CD system:
 You MUST update documentation when code changes affect documented behavior. Before completing any code change, verify:
 
 - [ ] **README.md** updated (if usage, examples, variable defaults, or feature descriptions changed)
-- [ ] **CLAUDE.md** updated (if variable design, coding patterns, or workflows changed)
+- [ ] **AGENTS.md** updated (if variable design, coding patterns, or workflows changed)
+- [ ] **terraform.tfvars.example** updated
 
 Check for these files both at the repository root and in affected subdirectories (e.g., `gcp/github/README.md`). Do not consider a task complete until documentation matches the current code.
 
