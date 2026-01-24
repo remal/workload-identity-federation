@@ -10,12 +10,13 @@ This repository contains Terraform configurations for setting up Workload Identi
 
 ```
 /
-├── .terraform-version          # Terraform version for tenv (repository root)
+├── .terraform-version            # Terraform version for tenv (repository root)
 └── <cloud>/<cicd>/
-    ├── main.tf                 # Provider configuration and main resources
-    ├── variables.tf            # Input variables
-    ├── outputs.tf              # Output values
-    ├── versions.tf             # Terraform and provider version constraints
+    ├── README.md                 # Module documentation
+    ├── main.tf                   # Provider configuration and main resources
+    ├── variables.tf              # Input variables
+    ├── outputs.tf                # Output values
+    ├── versions.tf               # Terraform and provider version constraints
     └── terraform.tfvars.example  # Example variable values
 ```
 
