@@ -1,12 +1,36 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["github>remal/renovate-config:global"],
+  extends: [
+    "github>remal/renovate-config:global"
+  ],
 
   "git-submodules": {
     // This is in beta for now, so let's use Dependabot to update Git submodules
     enabled: false
   },
-  
+
   // $$$sync-with-template-modifiable: local $$$
+  schedule: "* * * * 6",
+
+  packageRules: [
+    {
+      matchManagers: [
+        "terraform"
+      ],
+      matchDepTypes: [
+        'required_version'
+      ],
+      rangeStrategy: "bump"
+    },
+    {
+      matchManagers: [
+        "terraform"
+      ],
+      matchDepTypes: [
+        '!/^required_version$/'
+      ],
+      rangeStrategy: "pin"
+    }
+  ]
   // $$$sync-with-template-modifiable-end$$$
 }

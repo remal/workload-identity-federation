@@ -1,0 +1,176 @@
+# CLAUDE.md - Coding Agent Instructions
+
+## Project Overview
+
+This repository contains Terraform configurations for setting up Workload Identity Federation (WIF) between cloud providers and CI/CD systems. The primary goal is to eliminate long-lived service account keys by allowing CI/CD pipelines to authenticate using OIDC tokens.
+
+## Architecture
+
+### Folder Structure
+
+```
+/
+├── .terraform-version          # Terraform version for tenv (repository root)
+└── <cloud>/<cicd>/
+    ├── main.tf                 # Provider configuration and main resources
+    ├── variables.tf            # Input variables
+    ├── outputs.tf              # Output values
+    ├── versions.tf             # Terraform and provider version constraints
+    └── terraform.tfvars.example  # Example variable values
+```
+
+- `<cloud>`: lowercase cloud provider name (`gcp`, `aws`, `azure`)
+- `<cicd>`: lowercase CI/CD system name (`github`, `gitlab`)
+
+Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its own state.
+
+### Current Implementations
+
+- `gcp/github` - Google Cloud Platform + GitHub Actions
+
+## Design Decisions
+
+### GCP + GitHub Specific
+
+1. **Single repository per state**: Each Terraform apply configures WIF for exactly one GitHub repository. This keeps state isolated and simple.
+
+2. **Shared pool, separate providers**: Use one Workload Identity Pool (e.g., `github-pool`) that can be shared across repositories. Each repository gets its own Workload Identity Pool Provider within that pool.
+
+3. **Repository-only attribute condition**: OIDC token validation checks only the repository claim (`attribute.repository == "owner/repo"`). No branch or environment filtering - keep it simple.
+
+4. **Service account naming**: Optional variable with auto-generated default derived from repository name. Handle the 30-character SA name limit gracefully.
+
+5. **IAM role bindings managed**: Accept a list of GCP roles as input variable and bind them to the created service account. This is convenient but requires the applying user to have IAM admin permissions.
+
+6. **Outputs**: Raw values only - service account email and workload identity provider resource name. No workflow snippets.
+
+## Coding Standards
+
+### Terraform
+
+- **Version constraint**: `~> 1.14` (requires Terraform >= 1.14.0, < 2.0.0)
+- **Google provider**: Use latest stable version with pessimistic constraint (`~> 6.0` or similar)
+- Use `terraform fmt` for formatting
+- Use `terraform validate` before committing
+- Variables must have descriptions
+- Use `validation` blocks for input validation where appropriate
+- Prefer explicit resource references over `depends_on` when possible
+- Use `locals` for computed values and to reduce repetition
+
+### Naming Conventions
+
+- Resource names in Terraform: `snake_case`
+- GCP resource IDs: `kebab-case`
+- Variables: `snake_case`
+- Keep resource names short but descriptive
+
+### Variable Design
+
+Required variables should be minimal. Use sensible defaults where possible.
+
+For `gcp/github`, the required variables are:
+- `project_id` - GCP project ID
+- `repository` - GitHub repository in `owner/repo` format
+- `roles` - List of IAM roles to grant (can be empty list)
+
+Optional variables:
+- `service_account_id` - Custom service account ID (auto-generated if not provided)
+- `workload_identity_pool_id` - Custom pool ID (default: `github-pool`)
+- `region` - GCP region (default: `global` for WIF resources)
+
+## Local Development
+
+### Prerequisites
+
+- [tenv](https://github.com/tofuutils/tenv) for Terraform version management
+- `gcloud` CLI configured with appropriate credentials
+- Sufficient IAM permissions in target GCP project:
+  - `iam.workloadIdentityPools.create`
+  - `iam.workloadIdentityPoolProviders.create`
+  - `iam.serviceAccounts.create`
+  - `resourcemanager.projects.setIamPolicy` (if binding roles)
+
+### Terraform Version Management
+
+This project uses [tenv](https://github.com/tofuutils/tenv) to manage Terraform versions. A single `.terraform-version` file in the repository root specifies the required version for all modules.
+
+tenv automatically detects the `.terraform-version` file and uses the specified version. If the version isn't installed, tenv will install it automatically.
+
+```bash
+# Install tenv (macOS)
+brew install tenv
+
+# tenv automatically uses .terraform-version when you run terraform commands
+terraform version  # Uses version from .terraform-version
+```
+
+The `.terraform-version` file contains just the version number:
+```
+1.14.0
+```
+
+### Workflow
+
+1. Navigate to the appropriate directory (e.g., `cd gcp/github`)
+2. Copy `terraform.tfvars.example` to `terraform.tfvars`
+4. Fill in required variables
+5. Run `terraform init`
+6. Run `terraform plan` to preview changes
+7. Run `terraform apply` to create resources
+
+### State Management
+
+Terraform state is stored locally in `terraform.tfstate`. This file is git-ignored. Each user maintains their own local state for their own cloud projects.
+
+## Testing
+
+When adding new cloud/CI-CD combinations:
+
+1. Test with a real cloud account and CI/CD repository
+2. Verify the full flow: apply Terraform, then run a CI/CD pipeline that authenticates using WIF
+3. Test `terraform destroy` cleans up all created resources
+
+## Adding New Combinations
+
+When adding support for a new cloud or CI/CD system:
+
+1. Create the directory structure: `<cloud>/<cicd>/`
+2. Implement all required files (`main.tf`, `variables.tf`, `outputs.tf`, `versions.tf`)
+3. Add `terraform.tfvars.example` with documented examples
+4. Update the README.md to document the new combination
+5. Follow existing patterns from `gcp/github` for consistency
+
+## Common Patterns
+
+### Resource Naming with Length Limits
+
+GCP service account IDs have a 30-character limit. Use a pattern like:
+
+```hcl
+locals {
+  # Truncate and sanitize repository name for SA ID
+  repo_short_name = substr(replace(lower(var.repository), "/[^a-z0-9-]/", "-"), 0, 20)
+  service_account_id = coalesce(var.service_account_id, "gh-${local.repo_short_name}")
+}
+```
+
+### Conditional Resource Creation
+
+If a resource might optionally be created:
+
+```hcl
+resource "google_project_iam_member" "sa_roles" {
+  for_each = toset(var.roles)
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.github.email}"
+}
+```
+
+## Security Considerations
+
+- Never commit `terraform.tfvars` files containing real values
+- Never commit `terraform.tfstate` files
+- Use the principle of least privilege when specifying IAM roles
+- The attribute condition should be as restrictive as practical for your use case
