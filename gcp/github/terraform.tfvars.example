@@ -1,0 +1,25 @@
+# Required variables
+project_id = "my-gcp-project"
+repository = "owner/repo"
+
+# IAM roles to grant to the service account
+# Example roles for common use cases:
+roles = [
+  # "roles/storage.objectViewer",
+  # "roles/artifactregistry.reader",
+  # "roles/run.developer",
+]
+
+# Optional: Custom service account ID (auto-generated as "gh-{owner}-{repo}")
+# Required if auto-generated ID exceeds 30 characters
+# service_account_id = "gh-myorg-myrepo"
+
+# Optional: Custom provider ID (auto-generated as "{owner}-{repo}")
+# Required if auto-generated ID exceeds 32 characters
+# provider_id = "myorg-myrepo"
+
+# Optional: Custom Workload Identity Pool ID
+# workload_identity_pool_id = "github-pool"
+
+# Optional: Set to false to use an existing pool (for multi-repo setups)
+# create_pool = false

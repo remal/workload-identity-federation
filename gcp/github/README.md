@@ -47,8 +47,8 @@ brew install tenv
 
 5. Note the outputs:
    ```
-   service_account_email = "gh-my-repo@my-gcp-project.iam.gserviceaccount.com"
-   workload_identity_provider = "projects/123456789/locations/global/workloadIdentityPools/github-pool/providers/my-repo"
+   service_account_email      = "gh-my-org-my-repo@my-gcp-project.iam.gserviceaccount.com"
+   workload_identity_provider = "projects/123456789/locations/global/workloadIdentityPools/github-pool/providers/my-org-my-repo"
    ```
 
 6. Use in your GitHub Actions workflow:
@@ -61,9 +61,62 @@ brew install tenv
        steps:
          - uses: google-github-actions/auth@v2
            with:
-             workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/github-pool/providers/my-repo'
-             service_account: 'gh-my-repo@my-gcp-project.iam.gserviceaccount.com'
+             workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+             service_account: ${{ vars.SERVICE_ACCOUNT_EMAIL }}
    ```
+
+   Store the Terraform outputs as GitHub repository variables.
+
+## Usage Examples
+
+### Single Repository
+
+Basic setup for one repository:
+
+```hcl
+project_id = "my-gcp-project"
+repository = "acme/api"
+roles      = ["roles/storage.admin", "roles/run.developer"]
+```
+
+### Multiple Repositories with Shared Pool
+
+A single Workload Identity Pool can be shared across multiple repositories. Each repository gets its own provider and service account.
+
+First repository creates the pool:
+
+```hcl
+# terraform.tfvars for acme/api
+project_id = "my-gcp-project"
+repository = "acme/api"
+roles      = ["roles/storage.admin"]
+# create_pool = true (default)
+```
+
+Additional repositories reference the existing pool:
+
+```hcl
+# terraform.tfvars for acme/frontend
+project_id                = "my-gcp-project"
+repository                = "acme/frontend"
+workload_identity_pool_id = "github-pool"  # Same pool ID
+create_pool               = false          # Don't create, use existing
+roles                     = ["roles/run.developer"]
+```
+
+### Long Repository Names
+
+Service account IDs are limited to 30 characters, provider IDs to 32 characters. The module auto-generates IDs as `gh-{owner}-{repo}` and `{owner}-{repo}` respectively.
+
+If your repository name is too long, Terraform will fail with an error prompting you to provide custom values:
+
+```hcl
+project_id         = "my-gcp-project"
+repository         = "my-organization/my-very-long-repository-name"
+service_account_id = "gh-myorg-myrepo"  # Custom short ID
+provider_id        = "myorg-myrepo"     # Custom short ID
+roles              = []
+```
 
 ## How It Works
 
@@ -88,9 +141,11 @@ When a GitHub Actions workflow runs:
 |----------|----------|---------|-------------|
 | `project_id` | Yes | - | GCP project ID |
 | `repository` | Yes | - | GitHub repository (`owner/repo`) |
-| `roles` | Yes | - | List of IAM roles to grant |
-| `service_account_id` | No | Auto-generated | Custom service account ID |
-| `workload_identity_pool_id` | No | `github-pool` | Custom pool ID |
+| `roles` | No | `[]` | List of IAM roles to grant |
+| `service_account_id` | No | `gh-{owner}-{repo}` | Custom service account ID (6-30 chars) |
+| `provider_id` | No | `{owner}-{repo}` | Custom provider ID (4-32 chars) |
+| `workload_identity_pool_id` | No | `github-pool` | Workload Identity Pool ID |
+| `create_pool` | No | `true` | Set to `false` to use an existing pool |
 
 ## Security Notes
 
