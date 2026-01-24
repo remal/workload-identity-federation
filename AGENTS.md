@@ -34,7 +34,6 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
 ### Terraform
 
 - **Version constraint**: `~> 1.14` (requires Terraform >= 1.14.0, < 2.0.0)
-- **Google provider**: Use latest stable version with pessimistic constraint (`~> 6.0` or similar)
 - For Terraform file changes, run from the repository root:
   1. `./validate <cloud> <cicd>` to validate
   2. If validation succeeds, run `terraform fmt -recursive <cloud>/<cicd>` to format files
@@ -46,38 +45,20 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
 ### Naming Conventions
 
 - Resource names in Terraform: `snake_case`
-- GCP resource IDs: `kebab-case`
 - Variables: `snake_case`
 - Keep resource names short but descriptive
 - Avoid the abbreviation "WIF" — always use the full term "Workload Identity Federation"
 
 ### Variable Design
 
-Required variables should be minimal. Use sensible defaults where possible.
-
-For `gcp/github`, the required variables are:
-
-- `project_id` - GCP project ID
-- `repository` - GitHub repository in `owner/repo` format
-- `roles` - List of IAM roles to grant (can be empty list)
-
-Optional variables:
-
-- `service_account_id` - Custom service account ID (auto-generated if not provided)
-- `workload_identity_pool_id` - Custom pool ID (default: `github-pool`)
-- `region` - GCP region (default: `global` for Workload Identity Federation resources)
+Required variables should be minimal. Use sensible defaults where possible. See cloud-specific AGENTS.md files for variable details.
 
 ## Local Development
 
 ### Prerequisites
 
 - [tenv](https://github.com/tofuutils/tenv) for Terraform version management
-- `gcloud` CLI configured with appropriate credentials
-- Sufficient IAM permissions in target GCP project:
-  - `iam.workloadIdentityPools.create`
-  - `iam.workloadIdentityPoolProviders.create`
-  - `iam.serviceAccounts.create`
-  - `resourcemanager.projects.setIamPolicy` (if binding roles)
+- Cloud CLI configured with appropriate credentials (see cloud-specific AGENTS.md for details)
 
 ### Terraform Version Management
 
@@ -103,10 +84,10 @@ The `.terraform-version` file contains just the version number:
 
 1. Navigate to the appropriate directory (e.g., `cd gcp/github`)
 2. Copy `terraform.tfvars.example` to `terraform.tfvars`
-4. Fill in required variables
-5. Run `terraform init`
-6. Run `terraform plan` to preview changes
-7. Run `terraform apply` to create resources
+3. Fill in required variables
+4. Run `terraform init`
+5. Run `terraform plan` to preview changes
+6. Run `terraform apply` to create resources
 
 ### State Management
 
@@ -130,33 +111,14 @@ When adding support for a new cloud or CI/CD system:
 4. Update the README.md to document the new combination
 5. Follow existing patterns from `gcp/github` for consistency
 
-## Common Patterns
+## Documentation Maintenance
 
-### Resource Naming with Length Limits
+When making code changes, review and update relevant documentation files to keep them in sync. These files may exist at the repository root or within specific folders:
 
-GCP service account IDs have a 30-character limit. Use a pattern like:
+- **README.md** - Update if changes affect usage instructions, examples, or feature descriptions
+- **AGENTS.md** - Update if changes affect coding patterns, architecture, or development workflows
 
-```hcl
-locals {
-  # Truncate and sanitize repository name for SA ID
-  repo_short_name = substr(replace(lower(var.repository), "/[^a-z0-9-]/", "-"), 0, 20)
-  service_account_id = coalesce(var.service_account_id, "gh-${local.repo_short_name}")
-}
-```
-
-### Conditional Resource Creation
-
-If a resource might optionally be created:
-
-```hcl
-resource "google_project_iam_member" "sa_roles" {
-  for_each = toset(var.roles)
-
-  project = var.project_id
-  role    = each.value
-  member  = "serviceAccount:${google_service_account.github.email}"
-}
-```
+Check for these files both at the root level and in any affected subdirectories. Always ensure documentation accurately reflects the current state of the code.
 
 ## Security Considerations
 
