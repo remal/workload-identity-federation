@@ -19,11 +19,11 @@ fi
 (
   cd "$dir"
 
-  echo -e "\033[1mInitializing Terraform:\033[0m"
+  echo -e "\033[1mInitializing Terraform...\033[0m"
   terraform init -backend=false
 
   echo ""
 
-  echo -e "\033[1mValidating Terraform configuration:\033[0m"
+  echo -e "\033[1mValidating Terraform configuration...\033[0m"
   terraform validate
 )
