@@ -37,6 +37,7 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
 - For Terraform file changes, run from the repository root:
   1. `./validate <cloud> <cicd>` to validate
   2. If validation succeeds, run `terraform fmt -recursive <cloud>/<cicd>` to format files
+  3. Update documentation if the change affects documented behavior (see Documentation Maintenance)
 - Variables must have descriptions
 - Use `validation` blocks for input validation where appropriate
 - Prefer explicit resource references over `depends_on` when possible
@@ -109,12 +110,12 @@ When adding support for a new cloud or CI/CD system:
 
 ## Documentation Maintenance
 
-When making code changes, review and update relevant documentation files to keep them in sync. These files may exist at the repository root or within specific folders:
+You MUST update documentation when code changes affect documented behavior. Before completing any code change, verify:
 
-- **README.md** - Update if changes affect usage instructions, examples, or feature descriptions
-- **AGENTS.md** - Update if changes affect coding patterns, architecture, or development workflows
+- [ ] **README.md** updated (if usage, examples, variable defaults, or feature descriptions changed)
+- [ ] **CLAUDE.md** updated (if variable design, coding patterns, or workflows changed)
 
-Check for these files both at the root level and in any affected subdirectories. Always ensure documentation accurately reflects the current state of the code.
+Check for these files both at the repository root and in affected subdirectories (e.g., `gcp/github/README.md`). Do not consider a task complete until documentation matches the current code.
 
 ## Security Considerations
 
