@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This repository contains Terraform configurations for setting up Workload Identity Federation (WIF) between cloud providers and CI/CD systems. The primary goal is to eliminate long-lived service account keys by allowing CI/CD pipelines to authenticate using OIDC tokens.
+This repository contains Terraform configurations for setting up Workload Identity Federation between cloud providers and CI/CD systems. The primary goal is to eliminate long-lived service account keys by allowing CI/CD pipelines to authenticate using OIDC tokens.
 
 ## Architecture
 
@@ -29,22 +29,6 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
 
 - `gcp/github` - Google Cloud Platform + GitHub Actions
 
-## Design Decisions
-
-### GCP + GitHub Specific
-
-1. **Single repository per state**: Each Terraform apply configures WIF for exactly one GitHub repository. This keeps state isolated and simple.
-
-2. **Shared pool, separate providers**: Use one Workload Identity Pool (e.g., `github-pool`) that can be shared across repositories. Each repository gets its own Workload Identity Pool Provider within that pool.
-
-3. **Repository-only attribute condition**: OIDC token validation checks only the repository claim (`attribute.repository == "owner/repo"`). No branch or environment filtering - keep it simple.
-
-4. **Service account naming**: Optional variable with auto-generated default derived from repository name. Handle the 30-character SA name limit gracefully.
-
-5. **IAM role bindings managed**: Accept a list of GCP roles as input variable and bind them to the created service account. This is convenient but requires the applying user to have IAM admin permissions.
-
-6. **Outputs**: Raw values only - service account email and workload identity provider resource name. No workflow snippets.
-
 ## Coding Standards
 
 ### Terraform
@@ -65,6 +49,7 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
 - GCP resource IDs: `kebab-case`
 - Variables: `snake_case`
 - Keep resource names short but descriptive
+- Avoid the abbreviation "WIF" — always use the full term "Workload Identity Federation"
 
 ### Variable Design
 
@@ -80,7 +65,7 @@ Optional variables:
 
 - `service_account_id` - Custom service account ID (auto-generated if not provided)
 - `workload_identity_pool_id` - Custom pool ID (default: `github-pool`)
-- `region` - GCP region (default: `global` for WIF resources)
+- `region` - GCP region (default: `global` for Workload Identity Federation resources)
 
 ## Local Development
 
@@ -132,7 +117,7 @@ Terraform state is stored locally in `terraform.tfstate`. This file is git-ignor
 When adding new cloud/CI-CD combinations:
 
 1. Test with a real cloud account and CI/CD repository
-2. Verify the full flow: apply Terraform, then run a CI/CD pipeline that authenticates using WIF
+2. Verify the full flow: apply Terraform, then run a CI/CD pipeline that authenticates using Workload Identity Federation
 3. Test `terraform destroy` cleans up all created resources
 
 ## Adding New Combinations

@@ -1,6 +1,6 @@
 # Workload Identity Federation
 
-Terraform configurations for setting up Workload Identity Federation (WIF) between cloud providers and CI/CD systems.
+Terraform configurations for setting up Workload Identity Federation between cloud providers and CI/CD systems.
 
 ## Why?
 
