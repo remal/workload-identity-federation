@@ -11,7 +11,7 @@ Required variables:
 
 Optional variables:
 
-- `roles` - List of IAM roles to grant (default: `[]`)
+- `roles` - List of IAM roles to grant (default: `["roles/editor"]`)
 - `service_account_id` - Custom service account ID (auto-generated if not provided)
 - `workload_identity_pool_id` - Custom pool ID (default: `github-pool`)
 - `create_pool` - Whether to create the pool (default: `true`)

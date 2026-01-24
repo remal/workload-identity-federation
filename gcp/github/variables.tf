@@ -16,7 +16,7 @@ variable "repository" {
 variable "roles" {
   description = "List of IAM roles to grant to the service account"
   type        = list(string)
-  default     = []
+  default     = ["roles/editor"]
 }
 
 variable "service_account_id" {

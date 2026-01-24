@@ -141,7 +141,7 @@ When a GitHub Actions workflow runs:
 |----------|----------|---------|-------------|
 | `project_id` | Yes | - | GCP project ID |
 | `repository` | Yes | - | GitHub repository (`owner/repo`) |
-| `roles` | No | `[]` | List of IAM roles to grant |
+| `roles` | No | `["roles/editor"]` | List of IAM roles to grant |
 | `service_account_id` | No | `gh-{owner}-{repo}` | Custom service account ID (6-30 chars) |
 | `provider_id` | No | `{owner}-{repo}` | Custom provider ID (4-32 chars) |
 | `workload_identity_pool_id` | No | `github-pool` | Workload Identity Pool ID |
