@@ -6,7 +6,7 @@ Files in this `gcp/` folder are related to Google Cloud Platform only. No code r
 
 ### Terraform Provider
 
-- **Google provider**: Pin to a specific stable version (e.g., `7.16.0`)
+- **Google provider**: Pin to a specific stable version in `main.tf`
 
 ### Naming Conventions
 

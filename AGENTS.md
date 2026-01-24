@@ -13,10 +13,9 @@ This repository contains Terraform configurations for setting up Workload Identi
 ├── .terraform-version            # Terraform version for tenv (repository root)
 └── <cloud>/<cicd>/
     ├── README.md                 # Module documentation
-    ├── main.tf                   # Provider configuration and main resources
+    ├── main.tf                   # Provider configuration, version constraints, and main resources
     ├── variables.tf              # Input variables
     ├── outputs.tf                # Output values
-    ├── versions.tf               # Terraform and provider version constraints
     └── terraform.tfvars.example  # Example variable values
 ```
 
@@ -33,7 +32,8 @@ Each `<cloud>/<cicd>` combination is a standalone Terraform root module with its
 
 ### Terraform
 
-- **Version constraint**: `~> 1.14` (requires Terraform >= 1.14.0, < 2.0.0)
+- **Version constraint**: Defined in `main.tf` (terraform and provider blocks) and `.terraform-version`
+- **No separate versions.tf**: Keep `terraform` and `provider` blocks in `main.tf`, do not create a separate `versions.tf` file
 - For Terraform file changes, run from the repository root:
   1. `./validate <cloud> <cicd>` to validate
   2. If validation succeeds, run `terraform fmt -recursive <cloud>/<cicd>` to format files
@@ -74,11 +74,7 @@ brew install tenv
 terraform version  # Uses version from .terraform-version
 ```
 
-The `.terraform-version` file contains just the version number:
-
-```
-1.14.0
-```
+The `.terraform-version` file contains the version number.
 
 ### Workflow
 
@@ -106,7 +102,7 @@ When adding new cloud/CI-CD combinations:
 When adding support for a new cloud or CI/CD system:
 
 1. Create the directory structure: `<cloud>/<cicd>/`
-2. Implement all required files (`main.tf`, `variables.tf`, `outputs.tf`, `versions.tf`)
+2. Implement all required files (`main.tf`, `variables.tf`, `outputs.tf`)
 3. Add `terraform.tfvars.example` with documented examples
 4. Update the README.md to document the new combination
 5. Follow existing patterns from `gcp/github` for consistency
