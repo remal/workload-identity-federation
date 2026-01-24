@@ -2,9 +2,6 @@
 
 #$schema: 'https://docs.mergify.com/mergify-configuration-schema.json'
 
-# All Status Checks should be listed explicitly (see https://docs.mergify.io/conditions/#about-status-checks):
-#   `build` - .github/workflows/build.yml
-
 pull_request_rules:
 - name: Auto merge dependency updates
   conditions:
@@ -16,7 +13,7 @@ pull_request_rules:
   - '-merged'
   - '-draft'
   - '#changes-requested-reviews-by=0'
-  - 'check-success=build'
+  - 'check-success=build-success'
   - '#check-pending=0'
   - '#check-failure=0'
   - '#check-timed-out=0'
@@ -37,7 +34,7 @@ pull_request_rules:
   - '-merged'
   - '-draft'
   - '#changes-requested-reviews-by=0'
-  - 'check-success=build'
+  - 'check-success=build-success'
   - '#check-pending=0'
   - '#check-failure=0'
   - '#check-timed-out=0'

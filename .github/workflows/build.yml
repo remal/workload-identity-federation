@@ -54,3 +54,13 @@ jobs:
     - name: Terraform - Validate
       working-directory: ${{matrix.cloud}}/${{matrix.cicd}}
       run: terraform validate
+
+  build-success:
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+    - name: Build succeeded
+      run: |
+        echo "Build succeeded":
