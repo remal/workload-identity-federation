@@ -41,7 +41,7 @@ jobs:
 
     - name: Read Terraform version
       id: terraform-version
-      run: echo "version=$(cat .terraform-version | tr -d '[:space:]')" >> $GITHUB_OUTPUT
+      run: echo "version=$(tr -d '[:space:]' < .terraform-version)" >> "$GITHUB_OUTPUT"
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v4
       with:
